@@ -17,7 +17,7 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      useClass: DevService,
+      useClass: ProdService,
       imports: [ConfigModule],
     }),
     AlunosModule,
