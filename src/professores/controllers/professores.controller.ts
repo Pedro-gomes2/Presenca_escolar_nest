@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { ProfessoresService } from '../services/professores.service';
 import { CreateProfessorDto } from '../dto/create-professor.dto';
 import { UpdateProfessorDto } from '../dto/update-professor.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('professores')
-@Controller('professores')
+@Controller('/professores')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class ProfessoresController {
   constructor(private readonly professoresService: ProfessoresService) { }
 
@@ -18,9 +21,13 @@ export class ProfessoresController {
   findAll() {
     return this.professoresService.findAll();
   }
+  @Get('/nome/:nome')
+  findOneByNome(@Param('nome') nome: string) {
+    return this.professoresService.findOneByNome(nome);
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.professoresService.findOne(+id);
   }
 
@@ -33,4 +40,9 @@ export class ProfessoresController {
   remove(@Param('id') id: string) {
     return this.professoresService.remove(+id);
   }
+
+
+
 }
+
+ 

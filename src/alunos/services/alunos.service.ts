@@ -31,6 +31,16 @@ export class AlunosService {
     }
     return aluno;
   }
+  async findOneByMatricula(matricula: string): Promise<Aluno> {
+    const aluno = await this.alunoRepository.findOne({
+      where: { matricula },
+      relations: ['turma', 'presencas'],
+    });
+    if (!aluno) {
+      throw new NotFoundException(`Aluno com matrícula ${matricula} não encontrado`);
+    }
+    return aluno;
+  }
 
   async update(id: number, updateAlunoDto: UpdateAlunoDto): Promise<Aluno> {
     const aluno = await this.findOne(id);

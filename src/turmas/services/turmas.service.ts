@@ -33,6 +33,16 @@ export class TurmasService {
     }
     return turma;
   }
+  async findOneByCode(codigo: string): Promise<Turma> {
+    const turma = await this.turmaRepository.findOne({
+      where: { codigo },
+      relations: ['alunos', 'professores', 'presencas'],
+    });
+    if (!turma) {
+      throw new NotFoundException(`Turma com código ${codigo} não encontrada`);
+    }
+    return turma;
+  }
 
   async update(id: number, updateTurmaDto: UpdateTurmaDto): Promise<Turma> {
     const turma = await this.findOne(id);

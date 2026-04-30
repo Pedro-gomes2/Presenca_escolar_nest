@@ -11,6 +11,7 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { ProdService } from './data/services/prod.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DevService } from './data/services/dev.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { DevService } from './data/services/dev.service';
     ProfessoresModule,
     TurmasModule,
     PresencasModule,
-    UsuarioModule
+    UsuarioModule,
+    AuthModule   
   ],
   controllers: [AppController],
   providers: [AppService],

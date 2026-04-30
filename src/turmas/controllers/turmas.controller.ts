@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { TurmasService } from '../services/turmas.service';
 import { CreateTurmaDto } from '../dto/create-turma.dto';
 import { UpdateTurmaDto } from '../dto/update-turma.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('turmas')
-@Controller('turmas')
+@Controller('/turmas')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class TurmasController {
   constructor(private readonly turmasService: TurmasService) { }
 
@@ -23,8 +26,12 @@ export class TurmasController {
   findOne(@Param('id') id: string) {
     return this.turmasService.findOne(+id);
   }
+  @Get('/codigo/:codigo')
+  findOneByCode(@Param('codigo') codigo: string) {
+    return this.turmasService.findOneByCode(codigo);
+  }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateTurmaDto: UpdateTurmaDto) {
     return this.turmasService.update(+id, updateTurmaDto);
   }

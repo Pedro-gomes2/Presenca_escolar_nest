@@ -32,6 +32,16 @@ export class ProfessoresService {
     return professor;
   }
 
+  async findOneByNome(nome: string): Promise<Professor> {
+    const professor = await this.professorRepository.findOne({
+      where: { nome }
+    });
+    if (!professor) {
+      throw new NotFoundException(`Professor com nome ${nome} não encontrado`);
+    }
+    return professor;
+  }
+
   async update(id: number, updateProfessorDto: UpdateProfessorDto): Promise<Professor> {
     const professor = await this.findOne(id);
     this.professorRepository.merge(professor, updateProfessorDto);

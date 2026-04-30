@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { PresencasService } from '../services/presencas.service';
 import { CreatePresencaDto } from '../dto/create-presenca.dto';
 import { UpdatePresencaDto } from '../dto/update-presenca.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiTags('presencas')
-@Controller('presencas')
+@ApiTags('presenca')
+@Controller('/presenca')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class PresencasController {
   constructor(private readonly presencasService: PresencasService) { }
 
@@ -24,7 +27,7 @@ export class PresencasController {
     return this.presencasService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updatePresencaDto: UpdatePresencaDto) {
     return this.presencasService.update(+id, updatePresencaDto);
   }
