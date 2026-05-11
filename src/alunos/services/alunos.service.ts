@@ -14,7 +14,11 @@ export class AlunosService {
   ) { }
 
   async create(createAlunoDto: CreateAlunoDto): Promise<Aluno> {
-    const aluno = this.alunoRepository.create(createAlunoDto);
+    const { turmaId, ...rest } = createAlunoDto;
+    const aluno = this.alunoRepository.create(rest);
+    if (turmaId) {
+      aluno.turma = { id: turmaId } as any;
+    }
     return await this.alunoRepository.save(aluno);
   }
 
@@ -32,6 +36,7 @@ export class AlunosService {
     }
     return aluno;
   }
+
   async findOneByMatricula(matricula: string): Promise<Aluno> {
     const aluno = await this.alunoRepository.findOne({
       where: { matricula },
@@ -45,7 +50,16 @@ export class AlunosService {
 
   async update(id: number, updateAlunoDto: UpdateAlunoDto): Promise<Aluno> {
     const aluno = await this.findOne(id);
-    this.alunoRepository.merge(aluno, updateAlunoDto);
+    const { turmaId, ...rest } = updateAlunoDto;
+
+    // Atualiza campos escalares
+    Object.assign(aluno, rest);
+
+    // Atualiza relação de turma explicitamente
+    if (turmaId !== undefined) {
+      aluno.turma = turmaId ? ({ id: turmaId } as any) : null;
+    }
+
     return await this.alunoRepository.save(aluno);
   }
 

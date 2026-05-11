@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,13 +11,13 @@ import { TurmasModule } from './turmas/turmas.module';
 import { PresencasModule } from './presencas/presencas.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { ProdService } from './data/services/prod.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DevService } from './data/services/dev.service';
 import { AuthModule } from './auth/auth.module';
+import { ConfiguracoesModule } from './configuracoes/configuracoes.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useClass: ProdService,
       imports: [ConfigModule],
@@ -25,9 +27,10 @@ import { AuthModule } from './auth/auth.module';
     TurmasModule,
     PresencasModule,
     UsuarioModule,
-    AuthModule   
+    AuthModule,
+    ConfiguracoesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],   // AppService injeta UsuarioService (exportado por UsuarioModule)
+  providers: [AppService],
 })
 export class AppModule {}

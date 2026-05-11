@@ -17,4 +17,12 @@ export class CreateAlunoDto {
   @IsNumber()
   @IsOptional()
   taxaPresenca?: number;
+
+  @IsString()
+  @IsOptional()
+  nomeResponsavel?: string;
+
+  @IsString()
+  @IsOptional()
+  whatsappResponsavel?: string;
 }

@@ -32,4 +32,12 @@ export class Aluno {
   @ApiProperty()
   @Column({ type: 'float', default: 0 })
   taxaPresenca: number;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  nomeResponsavel: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  whatsappResponsavel: string;
 }
