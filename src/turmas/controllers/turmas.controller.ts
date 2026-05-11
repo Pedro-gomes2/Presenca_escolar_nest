@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { TurmasService } from '../services/turmas.service';
 import { CreateTurmaDto } from '../dto/create-turma.dto';
@@ -39,5 +39,21 @@ export class TurmasController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.turmasService.remove(+id);
+  }
+
+  @Post(':turmaId/professores/:professorId')
+  adicionarProfessor(
+    @Param('turmaId') turmaId: string,
+    @Param('professorId') professorId: string,
+  ) {
+    return this.turmasService.adicionarProfessor(+turmaId, +professorId);
+  }
+
+  @Delete(':turmaId/professores/:professorId')
+  removerProfessor(
+    @Param('turmaId') turmaId: string,
+    @Param('professorId') professorId: string,
+  ) {
+    return this.turmasService.removerProfessor(+turmaId, +professorId);
   }
 }

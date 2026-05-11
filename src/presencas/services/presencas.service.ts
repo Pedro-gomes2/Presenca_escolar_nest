@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Presenca } from '../entities/presenca.entity';
@@ -21,6 +21,21 @@ export class PresencasService {
 
     const aluno = await this.alunosService.findOne(alunoId);
     const turma = await this.turmasService.findOne(turmaId);
+
+    // Proteção contra presença duplicada no mesmo dia
+    const jaExiste = await this.presencaRepository.findOne({
+      where: {
+        aluno: { id: alunoId },
+        turma: { id: turmaId },
+        data: rest.data,
+      },
+      relations: ['aluno', 'turma'],
+    });
+    if (jaExiste) {
+      throw new ConflictException(
+        `Presença já registrada para este aluno nesta turma nesta data.`,
+      );
+    }
 
     const presenca = this.presencaRepository.create({
       ...rest,
@@ -66,5 +81,29 @@ export class PresencasService {
   async remove(id: number): Promise<void> {
     const presenca = await this.findOne(id);
     await this.presencaRepository.remove(presenca);
+  }
+
+  async findByFilter(data?: string, turmaId?: number, alunoId?: number): Promise<Presenca[]> {
+    const qb = this.presencaRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.aluno', 'aluno')
+      .leftJoinAndSelect('p.turma', 'turma');
+    if (data) qb.andWhere('p.data = :data', { data });
+    if (turmaId) qb.andWhere('turma.id = :turmaId', { turmaId });
+    if (alunoId) qb.andWhere('aluno.id = :alunoId', { alunoId });
+    return qb.orderBy('p.data', 'DESC').addOrderBy('p.horario', 'DESC').getMany();
+  }
+
+  async resumoDiario(data: string, turmaId?: number): Promise<{
+    presentes: number;
+    atrasados: number;
+    ausentes: number;
+    total: number;
+  }> {
+    const registros = await this.findByFilter(data, turmaId);
+    const presentes = registros.filter((p) => p.status === 'presente').length;
+    const atrasados = registros.filter((p) => p.status === 'atrasado').length;
+    const ausentes = registros.filter((p) => p.status === 'ausente').length;
+    return { presentes, atrasados, ausentes, total: registros.length };
   }
 }

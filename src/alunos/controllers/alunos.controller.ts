@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { AlunosService } from '../services/alunos.service';
 import { CreateAlunoDto } from '../dto/create-aluno.dto';
@@ -22,6 +22,11 @@ export class AlunosController {
   @Get('/matricula/:matricula')
   findOneByMatricula(@Param('matricula') matricula: string) {
     return this.alunosService.findOneByMatricula(matricula);
+  }
+
+  @Get(':id/qrcode/base64')
+  getQrCodeBase64(@Param('id') id: string) {
+    return this.alunosService.gerarQrCodeBase64(+id);
   }
 
   @Get()

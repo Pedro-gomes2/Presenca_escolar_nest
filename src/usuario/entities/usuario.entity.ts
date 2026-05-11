@@ -36,6 +36,14 @@ export class Usuario {
   tipo: string;
 
   @ApiProperty()
+  @Column({ nullable: true })
+  professorId: number;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  alunoId: number;
+
+  @ApiProperty()
   @CreateDateColumn()
   data_cadastro: Date;
 }

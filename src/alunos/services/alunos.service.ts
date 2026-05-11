@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Aluno } from '../entities/aluno.entity';
 import { CreateAlunoDto } from '../dto/create-aluno.dto';
 import { UpdateAlunoDto } from '../dto/update-aluno.dto';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class AlunosService {
@@ -51,5 +52,16 @@ export class AlunosService {
   async remove(id: number): Promise<void> {
     const aluno = await this.findOne(id);
     await this.alunoRepository.remove(aluno);
+  }
+
+  async gerarQrCodeBase64(id: number): Promise<{ qrcode: string }> {
+    const aluno = await this.findOne(id);
+    const payload = `presencheck://aluno?matricula=${aluno.matricula}&id=${aluno.id}`;
+    const dataUrl = await QRCode.toDataURL(payload, {
+      width: 300,
+      errorCorrectionLevel: 'H',
+      margin: 2,
+    });
+    return { qrcode: dataUrl };
   }
 }

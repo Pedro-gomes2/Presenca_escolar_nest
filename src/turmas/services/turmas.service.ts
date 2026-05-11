@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { Turma } from '../entities/turma.entity';
 import { CreateTurmaDto } from '../dto/create-turma.dto';
 import { UpdateTurmaDto } from '../dto/update-turma.dto';
+import { ProfessoresService } from '../../professores/services/professores.service';
 
 @Injectable()
 export class TurmasService {
   constructor(
     @InjectRepository(Turma)
     private readonly turmaRepository: Repository<Turma>,
+    private readonly professoresService: ProfessoresService,
   ) {}
 
   async create(createTurmaDto: CreateTurmaDto): Promise<Turma> {
@@ -53,5 +55,22 @@ export class TurmasService {
   async remove(id: number): Promise<void> {
     const turma = await this.findOne(id);
     await this.turmaRepository.remove(turma);
+  }
+
+  async adicionarProfessor(turmaId: number, professorId: number): Promise<Turma> {
+    const turma = await this.findOne(turmaId);
+    const professor = await this.professoresService.findOne(professorId);
+    if (!turma.professores.find((p) => p.id === professorId)) {
+      turma.professores.push(professor);
+      await this.turmaRepository.save(turma);
+    }
+    return this.findOne(turmaId);
+  }
+
+  async removerProfessor(turmaId: number, professorId: number): Promise<Turma> {
+    const turma = await this.findOne(turmaId);
+    turma.professores = turma.professores.filter((p) => p.id !== professorId);
+    await this.turmaRepository.save(turma);
+    return this.findOne(turmaId);
   }
 }
