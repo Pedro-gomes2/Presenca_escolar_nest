@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min } from 'class-validator';
 
 export class CreateTurmaDto {
   @IsString()
@@ -8,5 +8,11 @@ export class CreateTurmaDto {
   codigo: string;
 
   @IsString()
-  horario: string;
+  @IsOptional()
+  horario?: string;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  limiteAlunos?: number;
 }

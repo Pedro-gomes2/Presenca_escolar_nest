@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Aluno } from '../entities/aluno.entity';
+import { Turma } from '../../turmas/entities/turma.entity';
 import { CreateAlunoDto } from '../dto/create-aluno.dto';
 import { UpdateAlunoDto } from '../dto/update-aluno.dto';
 import * as QRCode from 'qrcode';
@@ -11,10 +12,43 @@ export class AlunosService {
   constructor(
     @InjectRepository(Aluno)
     private readonly alunoRepository: Repository<Aluno>,
-  ) { }
+    @InjectRepository(Turma)
+    private readonly turmaRepository: Repository<Turma>,
+  ) {}
+
+  /**
+   * Verifica se a turma ainda tem vagas disponíveis.
+   * @param turmaId  - ID da turma a verificar
+   * @param excluirAlunoId - ID do aluno atual (para não contar ele mesmo no update)
+   */
+  private async verificarVaga(turmaId: number, excluirAlunoId?: number): Promise<void> {
+    const turma = await this.turmaRepository.findOne({
+      where: { id: turmaId },
+      relations: ['alunos'],
+    });
+    if (!turma) throw new NotFoundException(`Turma com ID ${turmaId} não encontrada`);
+
+    if (turma.limiteAlunos !== null && turma.limiteAlunos !== undefined) {
+      const ocupados = turma.alunos.filter(a =>
+        excluirAlunoId ? a.id !== excluirAlunoId : true,
+      ).length;
+
+      if (ocupados >= turma.limiteAlunos) {
+        throw new BadRequestException(
+          `A turma "${turma.nome}" já atingiu o limite de ${turma.limiteAlunos} aluno(s). ` +
+          `Vagas ocupadas: ${ocupados}/${turma.limiteAlunos}.`,
+        );
+      }
+    }
+  }
 
   async create(createAlunoDto: CreateAlunoDto): Promise<Aluno> {
     const { turmaId, ...rest } = createAlunoDto;
+
+    if (turmaId) {
+      await this.verificarVaga(turmaId);
+    }
+
     const aluno = this.alunoRepository.create(rest);
     if (turmaId) {
       aluno.turma = { id: turmaId } as any;
@@ -24,7 +58,6 @@ export class AlunosService {
 
   async findAll(): Promise<any[]> {
     const alunos = await this.alunoRepository.find({ relations: ['turma', 'presencas'] });
-    // Calcula taxa de presença dinamicamente: (presentes + atrasados) / total registros
     return alunos.map(aluno => {
       const total    = aluno.presencas?.length ?? 0;
       const presentes = aluno.presencas?.filter(p => p.status !== 'ausente').length ?? 0;
@@ -60,11 +93,14 @@ export class AlunosService {
     const aluno = await this.findOne(id);
     const { turmaId, ...rest } = updateAlunoDto;
 
-    // Atualiza campos escalares
     Object.assign(aluno, rest);
 
-    // Atualiza relação de turma explicitamente
     if (turmaId !== undefined) {
+      // Só verifica limite se está mudando de turma (ou entrando em uma)
+      const turmaAtualId = (aluno.turma as any)?.id ?? null;
+      if (turmaId && turmaId !== turmaAtualId) {
+        await this.verificarVaga(turmaId, aluno.id);
+      }
       aluno.turma = turmaId ? ({ id: turmaId } as any) : null;
     }
 

@@ -19,8 +19,12 @@ export class Turma {
   codigo: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ nullable: true, default: '' })
   horario: string;
+
+  @ApiProperty({ nullable: true })
+  @Column({ nullable: true, type: 'int', default: null })
+  limiteAlunos: number | null;
 
   @ApiProperty({ type: () => Aluno, isArray: true })
   @OneToMany(() => Aluno, (aluno) => aluno.turma)
