@@ -13,6 +13,7 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { ProdService } from './data/services/prod.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfiguracoesModule } from './configuracoes/configuracoes.module';
+import { ScannerModule } from './scanner/scanner.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ConfiguracoesModule } from './configuracoes/configuracoes.module';
     UsuarioModule,
     AuthModule,
     ConfiguracoesModule,
+    ScannerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

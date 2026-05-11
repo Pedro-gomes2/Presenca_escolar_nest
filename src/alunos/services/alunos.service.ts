@@ -22,8 +22,16 @@ export class AlunosService {
     return await this.alunoRepository.save(aluno);
   }
 
-  async findAll(): Promise<Aluno[]> {
-    return await this.alunoRepository.find({ relations: ['turma'] });
+  async findAll(): Promise<any[]> {
+    const alunos = await this.alunoRepository.find({ relations: ['turma', 'presencas'] });
+    // Calcula taxa de presença dinamicamente: (presentes + atrasados) / total registros
+    return alunos.map(aluno => {
+      const total    = aluno.presencas?.length ?? 0;
+      const presentes = aluno.presencas?.filter(p => p.status !== 'ausente').length ?? 0;
+      const taxa = total > 0 ? Math.round((presentes / total) * 100) : 0;
+      const { presencas, ...rest } = aluno as any;
+      return { ...rest, taxaPresenca: taxa };
+    });
   }
 
   async findOne(id: number): Promise<Aluno> {

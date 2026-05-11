@@ -109,10 +109,15 @@ export class PresencasService {
       const config = await this.configService.findOrCreate();
       if (!config.notifFaltaAtiva || !config.whatsappAtivo) return;
 
-      const agora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      // Usa timezone de Brasília para comparar com o horário configurado pelo admin
+      const agora = new Date().toLocaleTimeString('pt-BR', {
+        hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo',
+      });
       if (agora !== config.horarioCorte) return;
 
-      const hoje = new Date().toISOString().split('T')[0];
+      // Data de hoje também em horário de Brasília
+      const hoje = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        .split('/').reverse().join('-'); // DD/MM/YYYY → YYYY-MM-DD
       const alunos = await this.alunosService.findAll();
       const presencasHoje = await this.findByFilter(hoje);
       const idsPresentes = new Set(presencasHoje.map(p => p.aluno?.id));

@@ -13,6 +13,7 @@ export class UsuarioController {
     constructor(private readonly usuarioService: UsuarioService) {}
 
     
+    @UseGuards(JwtAuthGuard)
     @Post()
     @HttpCode(HttpStatus.CREATED)
     create(@Body() usuario: Usuario) {

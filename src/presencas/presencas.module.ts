@@ -18,5 +18,6 @@ import { ConfiguracoesModule } from '../configuracoes/configuracoes.module';
   ],
   controllers: [PresencasController],
   providers: [PresencasService],
+  exports: [PresencasService],
 })
 export class PresencasModule { }
