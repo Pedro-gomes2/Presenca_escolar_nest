@@ -63,4 +63,17 @@ export class UsuarioService {
         const usuario = await this.findById(id);
         await this.usuarioRepository.remove(usuario);
     }
+
+    async alterarSenha(emailUsuario: string, senhaAtual: string, novaSenha: string): Promise<void> {
+        const usuario = await this.findByUsuario(emailUsuario);
+        if (!usuario)
+            throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+
+        const senhaCorreta = await this.bcrypt.compararSenhas(senhaAtual, usuario.senha);
+        if (!senhaCorreta)
+            throw new HttpException('Senha atual incorreta', HttpStatus.UNAUTHORIZED);
+
+        usuario.senha = await this.bcrypt.criptografarSenha(novaSenha);
+        await this.usuarioRepository.save(usuario);
+    }
 }

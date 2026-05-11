@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
 import { UsuarioService } from '../services/usuario.service';
 import { Usuario } from '../entities/usuario.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -36,6 +36,16 @@ export class UsuarioController {
     @Put('atualizar')
     update(@Body() usuario: Usuario) {
         return this.usuarioService.update(usuario);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('minha-senha')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    alterarSenha(
+        @Request() req: any,
+        @Body() body: { senhaAtual: string; novaSenha: string },
+    ) {
+        return this.usuarioService.alterarSenha(req.user.sub, body.senhaAtual, body.novaSenha);
     }
 
     @UseGuards(JwtAuthGuard)
