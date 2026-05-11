@@ -28,6 +28,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule   
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService],   // AppService injeta UsuarioService (exportado por UsuarioModule)
 })
 export class AppModule {}
